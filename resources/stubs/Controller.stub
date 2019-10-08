@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\{{modelName}}Request;
+use App\{{modelName}};
+use App\Repositories\{{modelName}}Repo;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Lang;
+use Mockery\Exception;
+use Yajra\DataTables\DataTables;
+use App\Http\Controllers\Controller;
+
+class {{modelName}}Controller extends Controller
+{
+
+    protected ${{modelNameSingularLowerCase}}Repo;
+
+    public function __construct({{modelName}}Repo ${{modelNameSingularLowerCase}}Repo) {
+        $this->{{modelNameSingularLowerCase}}Repo = ${{modelNameSingularLowerCase}}Repo;
+        $this->authorizeResource({{modelName}}::class, '{{modelNameSingularLowerCase}}');
+        //agregar en AuthServiceProvider.php 'App\{{modelName}}' => 'App\Policies\{{modelName}}Policy',
+    }
+
+    public function index()
+    {
+               //renderizado de vista listado
+               $list = view('site.{{modelNameSingularLowerCase}}.listing')->render();
+               return $list;
+    }
+    public function data(Request $request){
+     $models = $this->{{modelNameSingularLowerCase}}Repo->get{{modelName}}(
+                $request->input('filter_id') ? $request->input('filter_id'): null,
+                $request->input('filter_name') ? $request->input('filter_name'): null
+            );
+
+            return DataTables::of($models)
+                ->addColumn('actions',function ($model){
+                    $response="";
+                    $response.='<a title="Ver " style="margin:3px;"  href="'. route("{{modelNameSingularLowerCase}}.show",['{{modelNameSingularLowerCase}}'=>$model->getId()] ) .'" class="url_imodal btn btn-success btn-circle btn-xs" data-title="Mostrar datos " data-subtitle="" data-ico="" data-width="900"><i class="glyphicon glyphicon-eye-open"></i></a>';
+                    $response.='<a title="Editar " style="margin:3px;" href="'. route("{{modelNameSingularLowerCase}}.edit",['{{modelNameSingularLowerCase}}'=>$model->getId()] ) .'" class="url_imodal btn btn-info btn-circle btn-xs" data-title="Editar datos" data-subtitle="" data-ico="" data-width="900"><i class="glyphicon glyphicon-pencil"></i></a>';
+                    if($model->delete_at == null){
+                        $response.='<a title="Desactivar " style="margin:3px;" data-href="'. route("{{modelNameSingularLowerCase}}.destroy",['{{modelNameSingularLowerCase}}'=>$model->getId()] ) .'" class="btn btn-danger btn-circle btn-xs btn-delete text-white" data-title="Desactivar " data-subtitle="" data-ico="" data-width="900" ><i class="glyphicon glyphicon-trash"></i></a>';
+                    }else{
+                        $response.='<a title="Activar " style="margin:3px;" href="'.route("{{modelNameSingularLowerCase}}.restore",['{{modelNameSingularLowerCase}}'=>$model->getId()] ) .'" class="url_imodal btn btn-warning btn-circle btn-xs" data-title="Restaurar " data-subtitle="" data-ico="" data-width="900" ><i class="glyphicon glyphicon-retweet"></i></a>';
+                    }
+                    return $response;
+                })
+                ->rawColumns(['actions'])
+                ->make(true);
+    }
+
+    public function create()
+    {
+        try{
+            return view('site.{{modelNameSingularLowerCase}}.create-edit')->render();
+        }catch (\Throwable $exception){
+            $error_msg = $exception->getMessage();
+            return view('errors.error-modal', compact('error_msg'))->render();
+        }
+    }
+
+    public function store({{modelName}}Request $request)
+    {
+        try{
+            DB::beginTransaction();
+            {{requests}}
+
+            ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Repo->save({{stringRequests}});
+
+            return response()->json(${{modelNameSingularLowerCase}}, 201);
+            DB::commit();
+        }catch (\Throwable $exception){
+            DB::rollback();
+            $error_msg = $exception->getMessage();
+            return view('errors.error-modal', compact('error_msg'))->render();
+        }
+    }
+
+    public function show({{modelName}} ${{modelNameSingularLowerCase}})
+    {
+         try{
+            $model = ${{modelNameSingularLowerCase}};
+            if($model == null){
+                throw new Exception(__('error_manual_exeption'));
+            }
+            $model = $model->toArray();
+            return view('crud.see',compact('model'))->render();
+         }catch (\Throwable $exception){
+            $error_msg = $exception->getMessage();
+            return view('errors.error-modal', compact('error_msg'))->render();
+         }
+
+    }
+
+    public function edit({{modelName}} ${{modelNameSingularLowerCase}}) {
+        try{
+            return view('site.{{modelNameSingularLowerCase}}.create-edit',compact(${{modelNameSingularLowerCase}}))->render();
+        }catch (\Throwable $exception){
+            $error_msg = $exception->getMessage();
+            return view('errors.error-modal', compact('error_msg'))->render();
+        }
+    }
+
+    public function update({{modelName}}Request $request, {{modelName}} ${{modelNameSingularLowerCase}})
+    {
+        {{requests}}
+
+        ${{modelNameSingularLowerCase}} = $this->{{modelNameSingularLowerCase}}Repo->save({{stringRequests}}, ${{modelNameSingularLowerCase}});
+
+        return response()->json(${{modelNameSingularLowerCase}}, 200);
+    }
+
+
+     public function destroy($id, Request $request)
+        {
+            try{
+                $model = {{modelName}}::find($id);
+                $route = '{{modelNameSingularLowerCase}}.destroy';
+                $model_text='{{modelNameSingularLowerCase}}';
+                if($model == null){
+                    throw new Exception(__('error_null'));
+                }
+
+                try{
+                    if($model->getDeletedAt() == null){
+                        $model->delete();
+                    }else{
+                        $model->forceDelete();
+                    }
+                    return response(['title' => __('global.success'), 'message' => __('global.success.text')],200);
+                }catch (\Throwable $exception){
+                    return response(['title' => __('global.error'), 'message' => __('global.error.text').' '.$exception->getMessage()],404);
+                }
+
+            }catch (\Throwable $exception){
+                $error_msg = $exception->getMessage();
+                return view('errors.error-modal', compact('error_msg'))->render();
+            }
+        }
+        public function restore($id){
+
+        }
+}

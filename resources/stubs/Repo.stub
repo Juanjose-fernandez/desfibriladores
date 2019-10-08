@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Repositories;
+
+use App\{{modelName}};
+
+class {{modelName}}Repo extends BaseRepo {
+
+    public function getModel() {
+        return new {{modelName}}();
+    }
+
+    public function save({{stringRequests}}, ${{modelNameSingularLowerCase}} = null) {
+
+        if (is_null(${{modelNameSingularLowerCase}})) {
+            ${{modelNameSingularLowerCase}} = $this->getModel();
+        }
+
+        {{setters}}
+
+        ${{modelNameSingularLowerCase}}->save();
+
+        return ${{modelNameSingularLowerCase}};
+    }
+
+    public function get{{modelName}}($id){
+        $query = $this->getModel()
+        ->select('*');
+        return $query;
+
+
+    }
+
+}

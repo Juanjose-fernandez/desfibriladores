@@ -1,0 +1,67 @@
+<style>
+    /*añadir los estilos que seran aplicados a esta vista*/
+</style>
+<div id="breadcrumbs">
+{{--     <li class="breadcrumb-item"><a href="#">tes</a></li>--}}
+     <li class="breadcrumb-item active">{{__('menu.{{$model_name_camel}}')}}</li>
+</div>
+
+@includeIf('site.{{$model_name}}.filter')
+
+@includeif('site.{{$model_name}}.list')
+
+<script type="application/javascript">
+    //añadir javascript necesario para esta vista aqui.
+    $(document).ready(function() {
+        $('.datetimepicker').datetimepicker({
+            useCurrent: false, //Important! See issue #1075
+            format: 'DD/MM/YYYY',
+            locale: "es"
+        });
+
+        var  o{{$model_name}}Table = $('#o{{$model_name}}Table').DataTable( {
+            rowId: 'id',
+            "lengthChange": false,
+            "bFilter":false,
+            responsive: true,
+            "processing": true,
+            "serverSide": true,
+            "ajax":{
+                url: "{{route('{{$model_name_camel}}.data')}}",
+                data: function (d) {
+                {{$return_filter}}
+                }
+            } ,
+            "drawCallback": function (oSettings) {
+            },
+            "oLanguage": {
+                "sUrl": "{{ URL::asset('js/plugins/datatables/translations/spanish.json') }}"
+            },
+            "columns": [
+                {data:"id", name:"id"},
+                {data:"name", name:"name"},
+                {data:"actions", name:"actions"},
+            ]
+        });
+
+         $("#o{{$model_name}}Table tbody").on("click", ".btn-delete", function () {
+                    sweetDelete($(this).data('href'), '¿Está seguro?', 'Va a proceder a eliminar el registro',  o{{$model_name}}Table);
+         });
+
+        {{$filter_actions}}
+
+
+
+    });
+</script>
+
+
+<script type="application/javascript" id="pre-config">
+    //no modificar este scrip
+    $(document).ready(function() {
+        var test=1;
+        $('#breadcrumb-items').html($('#breadcrumbs').html());
+        $('#breadcrumbs').remove();
+        $('#pre-config').remove();
+    });
+</script>

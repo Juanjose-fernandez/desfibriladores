@@ -1,0 +1,7 @@
+@include('global.list',
+    ['id'=>'o{{$model_name}}Table',
+    'titleoTable'=>'assignment/list.assignments.list',
+    'icon'=>'fa fa-table',
+    'tfoot'=>false,
+    'columns'=>isset($table_columns) ? $table_columns : [['id','','expand'],['name','',''],['actions','','']]
+    ])

@@ -1,0 +1,24 @@
+<button class="btn btn-w-md btn-multiline btn-secondary" id="show_filer_{{$model_name}}"><i class="fa fa-filter fs-20"></i><br>{{__('theme.filter')}}</button>
+
+<a href='{{ route('{{$model_name_camel}}.create' )}}' data-toggle='modal' data-target='#modal-c-u-bonus' id='add' class='url_imodal btn btn-success btn-sm float-right' data-title='{{__('headers.add_carBrand')}}'><i class='fa fa-plus'></i>{{ __('global.new')}}</a>
+
+<form id="{{$model_name}}_form" action="" style="width: 100%;padding: 10px; ">
+<div class="row" >
+        {{$imputs}}
+</div>
+
+<div class="row" >
+    <button class="btn btn-label btn-primary" id="btn_{{$model_name}}_search"><label><i class="fa fa-search fs-20"></i></label>{{__('search')}}</button>
+</div>
+
+</form>
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        $("#show_filer_{{$model_name}}").click(function () {
+            $('#{{$model_name}}_form').toggle("slow");
+        });
+    });
+
+</script>
